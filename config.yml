@@ -1,0 +1,9 @@
+login:
+  username: 2336 #用户名（工号）
+  password: 2336 #密码
+
+check:
+  interval: 10 #单位秒
+
+log:
+  normal: false #是否显示操作正常的日志
