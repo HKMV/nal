@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::fs::File;
 use std::time::Duration;
 use async_trait::async_trait;
+use log::warn;
 use reqwest::{Client, Error};
 use serde::{Deserialize, Serialize};
 use serde::__private::de::Content::I16;
@@ -43,6 +45,48 @@ pub struct NetStatusCheck {
     /// 检测间隔时间，单位秒
     pub interval: u16,
 }
+
+/// NAL配置参数
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NalConfig {
+    pub net_type: Option<NetType>,
+    pub login: LoginConfig,
+    pub check: NetStatusCheck,
+}
+
+impl NalConfig {
+    pub fn default() -> Self {
+        NalConfig {
+            net_type: Option::from(NetType::Sangfor),
+            login: LoginConfig { username: "".to_string(), password: "".to_string() },
+            check: NetStatusCheck { interval: 0 },
+        }
+    }
+}
+
+/// 初始化配置
+pub fn init_config() -> NalConfig {
+    let result = File::open("./config.yml");
+    if result.is_err() {
+        //初始化配置
+        return NalConfig::default();
+    }
+
+    //缺少字段会导致序列化出错
+    let result1 = serde_yaml::from_reader(result.unwrap());
+    if result1.is_err() {
+        let string = result1.err().unwrap().to_string();
+        warn!("config serde_yaml error: {string}");
+        NalConfig::default()
+    } else {
+        let mut yaml: NalConfig = result1.unwrap_or(NalConfig::default());
+        if yaml.net_type.is_none() {
+            yaml.net_type = Option::from(NetType::Sangfor)
+        }
+        yaml
+    }
+}
+
 
 
 /// 获取没有代理的客户端
