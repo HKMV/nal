@@ -1,4 +1,5 @@
-use std::fs;
+use std::ffi::OsString;
+use std::{env, fs};
 use std::fs::{File, OpenOptions};
 use std::str::FromStr;
 use tokio::time::{Duration, sleep};
@@ -10,8 +11,11 @@ use crate::core::nal;
 use crate::core::nal::{login, LoginConfig, NetStatusCheck, NetType};
 use crate::core::sangfor::Sangfor;
 use std::io::{Error, Write};
+use std::path::PathBuf;
 use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
+use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
+use util::service::Service;
 
 mod core;
 mod test;
@@ -23,6 +27,8 @@ async fn main() {
 
     let config = nal::init_config();
     info!("config: {config:#?}");
+
+    let service = Service::new("net-auto-login");
 
     /*let expression = "* 1 * * * * *";
     let schedule = Schedule::from_str(expression).unwrap();
