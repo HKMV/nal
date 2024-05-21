@@ -4,7 +4,7 @@ use std::str::FromStr;
 use tokio::time::{Duration, sleep};
 use chrono::{Datelike, DateTime, Local, Timelike, Utc};
 use cron::Schedule;
-use log::{info, warn};
+use log::{debug, info, warn};
 use serde_json::Value::Bool;
 use crate::core::nal;
 use crate::core::nal::{login, LoginConfig, NetStatusCheck, NetType};
@@ -17,11 +17,9 @@ mod core;
 mod test;
 mod util;
 
-
-
 #[tokio::main]
 async fn main() {
-    util::logs::init("nal.log").expect("初始化日志出错");
+    util::logs::init("nal.log", log::LevelFilter::Debug).expect("初始化日志出错");
 
     let config = nal::init_config();
     info!("config: {config:#?}");

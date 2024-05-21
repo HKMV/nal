@@ -1,8 +1,9 @@
 use std::fs;
 use chrono::Local;
+use log::LevelFilter;
 
 /// 初始化日志
-pub fn init(log_file: &str) -> Result<(), fern::InitError> {
+pub fn init(log_file: &str, level: LevelFilter) -> Result<(), fern::InitError> {
     fs::create_dir_all("./logs").unwrap();  // 如果需要，创建日志目录
     let log_file_path = "./logs/".to_string() + log_file;
     /*
@@ -47,7 +48,7 @@ pub fn init(log_file: &str) -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .level(log::LevelFilter::Info)
+        .level(level)
         .chain(std::io::stdout())
 
         .chain(fern::log_file(log_file_path)?)
