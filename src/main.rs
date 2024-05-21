@@ -13,22 +13,46 @@ use crate::core::sangfor::Sangfor;
 use std::io::{Error, Write};
 use std::path::PathBuf;
 use std::time::SystemTime;
+use clap::{Command, Parser};
 use serde::{Deserialize, Serialize};
 use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
 use util::service::Service;
+use crate::util::cmd::Cli;
 
 mod core;
-mod test;
 mod util;
 
 #[tokio::main]
 async fn main() {
     util::logs::init("nal.log", log::LevelFilter::Debug).expect("初始化日志出错");
 
+    let cli = util::cmd::Cli::parse();
+    let service = Service::new("net-auto-login");
+    if cli.install {
+        service.install();
+        return;
+    }
+    if cli.uninstall {
+        service.uninstall();
+        return;
+    }
+    if cli.start {
+        service.start();
+        return;
+    }
+    if cli.stop {
+        service.stop();
+        return;
+    }
+    if cli.run {
+        handler().await;
+        return;
+    }
+}
+
+async fn handler(){
     let config = nal::init_config();
     info!("config: {config:#?}");
-
-    let service = Service::new("net-auto-login");
 
     /*let expression = "* 1 * * * * *";
     let schedule = Schedule::from_str(expression).unwrap();

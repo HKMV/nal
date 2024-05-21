@@ -35,7 +35,7 @@ impl Service {
     }
 
     /// 安装到系统服务
-    fn install(&self) {
+    pub fn install(&self) {
         // 使用底层服务管理平台安装我们的服务
         self.service_manage.install(ServiceInstallCtx {
             label: self.name.clone(),
@@ -46,33 +46,33 @@ impl Service {
             working_directory: None, // 服务进程的工作目录的可选字符串。
             environment: None, // 用于提供服务进程的环境变量的可选列表。
         }).expect("Failed to install");
-        info!("{:?}服务安装完成。",self.path.clone())
+        info!("{:}服务安装完成。",self.name.clone().to_string())
     }
 
     /// 从系统服务卸载
-    fn uninstall(&self) {
+    pub fn uninstall(&self) {
         // 使用底层服务管理平台卸载我们的服务
         self.service_manage.uninstall(ServiceUninstallCtx {
             label: self.name.clone()
         }).expect("Failed to uninstall");
-        info!("{:?}服务卸载完成。",self.path.clone())
+        info!("{:}服务卸载完成。",self.name.clone().to_string())
     }
 
     /// 启动这个服务
-    fn start(&self) {
+    pub fn start(&self) {
         // 使用底层服务管理平台启动我们的服务
         self.service_manage.start(ServiceStartCtx {
             label: self.name.clone()
         }).expect("Failed to start");
-        info!("{:?}服务启动完成。",self.path.clone())
+        info!("{:}服务启动完成。",self.name.clone().to_string())
     }
 
     /// 停止这个服务
-    fn stop(&self) {
+    pub fn stop(&self) {
         // 使用底层服务管理平台停止我们的服务
         self.service_manage.stop(ServiceStopCtx {
             label: self.name.clone()
         }).expect("Failed to stop");
-        info!("{:?}服务停止完成。",self.path.clone())
+        info!("{:}服务停止完成。",self.name.clone().to_string())
     }
 }
