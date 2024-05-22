@@ -105,11 +105,18 @@ pub fn get_no_proxy_client() -> Client {
 
 /// 检测网络是否正常
 pub async fn check_net() -> bool {
-    get_no_proxy_client()
-        .get("http://baidu.com")
-        .send()
-        .await
-        .is_ok()
+    let mut fail_count = 0;
+    for i in 0..3 {
+        if !get_no_proxy_client()
+            .get("https://baidu.com")
+            .send()
+            .await
+            .is_ok() {
+            fail_count += 1;
+        }
+    }
+    //失败次数小于3认为网络是正常的
+    fail_count < 3
 }
 
 pub async fn login<T: Nal>(nal: &T, lc: &LoginConfig) -> Result<bool, Error> {
