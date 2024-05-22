@@ -58,8 +58,14 @@ impl NalConfig {
     pub fn default() -> Self {
         NalConfig {
             net_type: Option::from(NetType::Sangfor),
-            login: LoginConfig { username: "".to_string(), password: "".to_string() },
-            check: NetStatusCheck { interval: 0 },
+            login: LoginConfig {
+                username: "".to_string(),
+                password: "".to_string(),
+            },
+            check: NetStatusCheck {
+                // 默认3秒
+                interval: 3
+            },
         }
     }
 }
@@ -86,7 +92,6 @@ pub fn init_config() -> NalConfig {
         yaml
     }
 }
-
 
 
 /// 获取没有代理的客户端

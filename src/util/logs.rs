@@ -1,12 +1,22 @@
-use std::fs;
+use std::{env, fs};
+use std::io::{Error};
+use std::path::Path;
 use chrono::Local;
 use log::LevelFilter;
+use log::{error, LevelFilter};
 
 /// 初始化日志
-pub fn init(log_file: &str, level: LevelFilter) -> Result<(), fern::InitError> {
-    fs::create_dir_all("./logs").unwrap();  // 如果需要，创建日志目录
-    let log_file_path = "./logs/".to_string() + log_file;
-    /*
+pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
+    let current_dir = if cfg!(target_os = "windows") {
+        // env::current_dir()?.to_str().unwrap_or(".").to_string()
+        env::current_exe()?
+            .parent().unwrap_or(Path::new("."))
+            .to_str().unwrap_or(".").to_string()
+    } else { ".".to_string() };
+    let logs_dir = current_dir + "/logs/";
+    fs::create_dir_all(logs_dir.clone()).unwrap();  // 如果需要，创建日志目录
+    let log_file_path = logs_dir.to_string() + log_file;
+    /* //env_logger
         /// 定义一个函数用于将DateTime对象转换为指定格式的字符串
         fn format_timestamp(dt: Timestamp) -> String {
             let dt: DateTime<Utc> = DateTime::from_str(&*dt.to_string()).unwrap();

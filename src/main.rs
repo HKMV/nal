@@ -30,6 +30,7 @@ async fn main() {
     let service = Service::new("net-auto-login");
     if cli.install {
         service.install();
+        service.start();
         return;
     }
     if cli.uninstall {
