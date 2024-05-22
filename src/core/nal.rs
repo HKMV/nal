@@ -93,6 +93,7 @@ pub fn init_config() -> NalConfig {
 pub fn get_no_proxy_client() -> Client {
     Client::builder()
         .no_proxy() // 禁用代理
+        .connect_timeout(Duration::from_secs(10))
         .timeout(Duration::from_secs(30))
         .build().unwrap()
 }

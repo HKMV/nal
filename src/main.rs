@@ -33,6 +33,7 @@ async fn main() {
         return;
     }
     if cli.uninstall {
+        service.stop();
         service.uninstall();
         return;
     }

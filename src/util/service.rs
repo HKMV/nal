@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsString;
 use std::path::PathBuf;
 use log::{debug, info};
 use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
@@ -40,7 +41,7 @@ impl Service {
         self.service_manage.install(ServiceInstallCtx {
             label: self.name.clone(),
             program: self.path.clone(),
-            args: vec![],
+            args: vec![OsString::from("--run")],
             contents: None, // 特定于系统的服务内容的可选字符串。
             username: None, // 可选字符串，供备用用户运行服务。
             working_directory: None, // 服务进程的工作目录的可选字符串。
