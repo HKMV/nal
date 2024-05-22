@@ -52,7 +52,7 @@ async fn main() {
 
 async fn handler(){
     let config = nal::init_config();
-    info!("config: {config:#?}");
+    debug!("config: {config:#?}");
 
     /*let expression = "* 1 * * * * *";
     let schedule = Schedule::from_str(expression).unwrap();

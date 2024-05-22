@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::future::Future;
 use std::time::{SystemTime, UNIX_EPOCH};
 use async_trait::async_trait;
-use log::info;
+use log::{debug, info};
 use reqwest::{Error, Response};
 use crate::core::nal;
 use crate::core::nal::{get_no_proxy_client, LoginConfig, Nal};
@@ -60,7 +60,7 @@ impl Nal for Sangfor {
             .await?
             .json::<serde_json::Value>()
             .await?;
-        info!("login result: {rsp:#?}");
+        debug!("login result: {rsp:#?}");
         // rsp.is_ok()
         Ok(rsp["success"] == true)
     }
