@@ -25,7 +25,7 @@ mod test;
 
 #[tokio::main]
 async fn main() {
-    util::logs::init("nal.log", log::LevelFilter::Info).expect("初始化日志出错");
+    util::logs::init("nal.log", log::LevelFilter::Debug).expect("初始化日志出错");
 
     let cli = util::cmd::Cli::parse();
     let service = Service::new("net-auto-login");
@@ -50,6 +50,9 @@ async fn main() {
     if cli.run {
         handler().await;
         return;
+    }
+    if cfg!(debug_assertions) {
+        handler().await
     }
 }
 
