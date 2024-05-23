@@ -3,8 +3,6 @@ use std::{env, fs};
 use std::fs::{File, OpenOptions};
 use std::str::FromStr;
 use tokio::time::{Duration, sleep};
-use chrono::{Datelike, DateTime, Local, Timelike, Utc};
-use cron::Schedule;
 use log::{debug, info, warn};
 use serde_json::Value::Bool;
 use crate::core::nal;
@@ -56,18 +54,9 @@ async fn main() {
     }
 }
 
-async fn handler(){
+async fn handler() {
     let config = nal::init_config();
     debug!("config: {config:#?}");
-
-    /*let expression = "* 1 * * * * *";
-    let schedule = Schedule::from_str(expression).unwrap();
-    println!("All stars: Upcoming fire times for '{}':", expression);
-    for datetime in schedule.upcoming(Utc).take(10) {
-        let is_ok = nal::check_net().await;
-        println!("net isOk: -> {is_ok:}");
-    }*/
-
     loop {
         //检测网络是否正常
         let is_ok = nal::check_net().await;

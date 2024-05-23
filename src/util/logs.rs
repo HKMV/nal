@@ -1,17 +1,12 @@
 use std::{env, fs};
+use std::fs::File;
 use std::io::{Error};
 use std::path::Path;
-use chrono::Local;
-use log4rs::append::console::ConsoleAppender;
-use log4rs::append::file::FileAppender;
-use log4rs::{Config};
-use log4rs::config::{Appender, Logger, Root};
-use log4rs::encode::pattern::PatternEncoder;
+use std::sync::Mutex;
 use log::{error, LevelFilter};
-use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
-use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
-use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
-use log4rs::append::rolling_file::policy::compound::trigger::time::{TimeTrigger, TimeTriggerConfig, TimeTriggerInterval};
+use tracing::{info, Level};
+use tracing_subscriber::fmt::writer::MakeWriterExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 /// 初始化日志
 pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
@@ -23,9 +18,9 @@ pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
     } else { ".".to_string() };
     let logs_dir = current_dir + "/logs/";
     fs::create_dir_all(logs_dir.clone()).unwrap();  // 如果需要，创建日志目录
-    let log_file_path = logs_dir.clone().to_string() + log_file;
+    // let log_file_path = logs_dir.clone().to_string() + log_file;
 
-    init_log4rs(log_file_path, level);
+    init_tracing(logs_dir, log_file.to_string(), level);
     Ok(())
 }
 
@@ -64,6 +59,7 @@ fn init_env_logger() {
 
 fn init_fern() {
     /* //fern
+    use chrono::Local;
     fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
@@ -86,15 +82,26 @@ fn init_fern() {
 /// 这是创建新文件的大小。32MB
 const TRIGGER_FILE_SIZE: u64 = 1024 * 1024 * 32;
 /// 日志存档将移动到的位置 有关模式信息，请参阅：
-///     https://docs.rs/log4rs/*/log4rs/append/rolling_file/policy/compound/roll/fixed_window/struct.FixedWindowRollerBuilder.html#method.build
+///     https://docs.rs/log4rs/latest/log4rs/append/rolling_file/policy/compound/roll/fixed_window/struct.FixedWindowRollerBuilder.html#method.build
 const ARCHIVE_PATTERN: &str = "./logs/nal.{}.log";
 /// 要保留的存档日志文件数
 const LOG_FILE_COUNT: u32 = 3;
 
 /// 初始化log4rs
 fn init_log4rs(log_file_path: String, level: LevelFilter) {
+    /*
+    use log4rs::append::console::ConsoleAppender;
+    use log4rs::append::file::FileAppender;
+    use log4rs::{Config};
+    use log4rs::config::{Appender, Logger, Root};
+    use log4rs::encode::pattern::PatternEncoder;
+    use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
+    use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
+    use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
+    use log4rs::append::rolling_file::policy::compound::trigger::time::{TimeTrigger, TimeTriggerConfig, TimeTriggerInterval};
+
     // log4rs
-    // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html
+    // Pattern: https://docs.rs/log4rs/latest/log4rs/encode/pattern/index.html
     let pattern = Box::new(PatternEncoder::new("[{d(%Y-%m-%d %H:%M:%S)} {h({l}):<5.5} {M}] {f}:{L} {m}{n}"));
 
     // 创建用于文件日志记录的策略
@@ -135,4 +142,36 @@ fn init_log4rs(log_file_path: String, level: LevelFilter) {
             .unwrap()
     };
     log4rs::init_config(config).unwrap();
+    */
+}
+
+fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
+    let format = time::format_description::parse(
+        "[year]-[month padding:zero]-[day padding:zero] [hour]:[minute]:[second].[subsecond digits:3]",
+    ).unwrap();
+    // time::format_description::well_known::Rfc3339;
+
+    tracing_subscriber::fmt()
+        .with_file(true)
+        .with_level(true)
+        .with_target(true)
+        .with_line_number(true)
+        .with_thread_names(true)
+        .with_thread_ids(true)
+        .with_test_writer()
+        .with_max_level(Level::INFO)
+        .with_timer(tracing_subscriber::fmt::time::OffsetTime::new(
+            time::macros::offset!(+8), format,
+        ))
+        .with_ansi(false)
+        .with_writer(
+            Mutex::new(tracing_appender::rolling::daily(logs_dir.clone(), log_file.clone())).and(
+                //将 ERROR 及以上级别的日志输出到 stderr, 其他级别日志则输出到 stdout
+                std::io::stdout
+                    .with_filter(|meta| meta.level() > &Level::ERROR)
+                    .or_else(std::io::stderr)
+            )
+        )
+        .finish()
+        .init();
 }

@@ -1,5 +1,5 @@
 [package]
-name = "Nal"
+name = "nal"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,11 +14,15 @@ serde_yaml = "0.9.32"
 #rc4 = "0.1.0"
 log = "0.4.20"
 async-trait = "0.1.77"
-cron = "0.12.1"
 chrono = "0.4.34"
+time = { version = "0.3.36", features = ["parsing", "macros"] }
 #env_logger = "0.11.3"
 #fern = "0.6"
-log4rs = "1.3.0"
+#log4rs = "1.3.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["time"] }
+tracing-core = "0.1.32"
+tracing-appender = "0.2"
 yaml-rust = "0.4.5"
 service-manager = "0.6.1"
 clap = { version = "4.5.4", features = ["derive"] }
