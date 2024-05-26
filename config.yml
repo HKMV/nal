@@ -1,9 +1,9 @@
+net_type: Sangfor
 login:
-  username: 2336 #用户名（工号）
-  password: 2336 #密码
-
+  username: ''
+  password: ''
 check:
-  interval: 10 #单位秒
-
+  interval: 3
 log:
-  normal: false #是否显示操作正常的日志
+  level: INFO
+  normal: false

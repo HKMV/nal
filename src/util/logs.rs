@@ -2,6 +2,7 @@ use std::{env, fs};
 use std::fs::File;
 use std::io::{Error};
 use std::path::Path;
+use std::str::FromStr;
 use std::sync::Mutex;
 use log::{error, LevelFilter};
 use tracing::{info, Level};
@@ -151,6 +152,7 @@ fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
     ).unwrap();
     // time::format_description::well_known::Rfc3339;
 
+    let tracing_level = Level::from_str(level.as_str()).unwrap();
     tracing_subscriber::fmt()
         .with_file(true)
         .with_level(true)
@@ -159,7 +161,7 @@ fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
         .with_thread_names(true)
         .with_thread_ids(true)
         .with_test_writer()
-        .with_max_level(Level::INFO)
+        .with_max_level(tracing_level)
         .with_timer(tracing_subscriber::fmt::time::OffsetTime::new(
             time::macros::offset!(+8), format,
         ))

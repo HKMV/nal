@@ -2,12 +2,14 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::time::Duration;
 use async_trait::async_trait;
-use log::warn;
+use log::{LevelFilter, warn};
 use reqwest::{Client, Error};
 use serde::{Deserialize, Serialize};
 use serde::__private::de::Content::I16;
 use serde_json::Value;
+use serde_yaml::Serializer;
 use tokio::time::timeout;
+use tracing_subscriber::fmt::MakeWriter;
 
 /// 网络自动登录trait
 #[async_trait]
@@ -46,12 +48,20 @@ pub struct NetStatusCheck {
     pub interval: u16,
 }
 
+/// 日志相关配置
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LogConfig{
+    pub level: String,
+    pub normal: bool
+}
+
 /// NAL配置参数
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NalConfig {
     pub net_type: Option<NetType>,
     pub login: LoginConfig,
     pub check: NetStatusCheck,
+    pub log: LogConfig
 }
 
 impl NalConfig {
@@ -66,16 +76,26 @@ impl NalConfig {
                 // 默认3秒
                 interval: 3
             },
+            log: LogConfig {
+                //默认日志级别info
+                level: LevelFilter::Info.to_string(),
+                // 默认不显示正常日志
+                normal: false,
+            },
         }
     }
 }
 
 /// 初始化配置
 pub fn init_config() -> NalConfig {
-    let result = File::open("./config.yml");
+    let conf_file_path = "./config.yml";
+    let result = File::open(conf_file_path.clone());
     if result.is_err() {
         //初始化配置
-        return NalConfig::default();
+        let config = NalConfig::default();
+        let file_write = File::create(conf_file_path).unwrap();
+        config.serialize(&mut Serializer::new(&file_write)).expect("序列化输出失败!");
+        return config;
     }
 
     //缺少字段会导致序列化出错
