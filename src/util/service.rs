@@ -44,7 +44,7 @@ impl Service {
             args: vec![OsString::from("--run")],
             contents: None, // 特定于系统的服务内容的可选字符串。
             username: None, // 可选字符串，供备用用户运行服务。
-            working_directory: None, // 服务进程的工作目录的可选字符串。
+            working_directory: Option::from(self.path.parent().unwrap().to_path_buf()), // 服务进程的工作目录的可选字符串。
             environment: None, // 用于提供服务进程的环境变量的可选列表。
         }).expect("Failed to install");
         info!("{:}服务安装完成。",self.name.clone().to_string())
