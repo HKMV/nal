@@ -1,11 +1,10 @@
 use std::{env, fs};
-use std::fs::File;
 use std::io::{Error};
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
-use log::{error, LevelFilter};
-use tracing::{info, Level};
+use log::{LevelFilter};
+use tracing::{Level};
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
@@ -25,8 +24,8 @@ pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
     Ok(())
 }
 
-fn init_env_logger() {
-    /* //env_logger
+/* fn init_env_logger() {
+    //env_logger
         /// 定义一个函数用于将DateTime对象转换为指定格式的字符串
         fn format_timestamp(dt: Timestamp) -> String {
             let dt: DateTime<Utc> = DateTime::from_str(&*dt.to_string()).unwrap();
@@ -55,11 +54,11 @@ fn init_env_logger() {
             }) // 自定义格式化逻辑
             // .filter(Some("crate"), log::LevelFilter::Info) // 只记录指定crate的日志
             .target(log_file_path)
-            .init();*/
-}
+            .init();
+}*/
 
-fn init_fern() {
-    /* //fern
+/* fn init_fern() {
+    //fern
     use chrono::Local;
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -76,21 +75,19 @@ fn init_fern() {
         .chain(std::io::stdout())
 
         .chain(fern::log_file(log_file_path)?)
-        .apply()?;*/
-}
+        .apply()?;
+}*/
 
 
-/// 这是创建新文件的大小。32MB
+/*/// 这是创建新文件的大小。32MB
 const TRIGGER_FILE_SIZE: u64 = 1024 * 1024 * 32;
 /// 日志存档将移动到的位置 有关模式信息，请参阅：
 ///     https://docs.rs/log4rs/latest/log4rs/append/rolling_file/policy/compound/roll/fixed_window/struct.FixedWindowRollerBuilder.html#method.build
 const ARCHIVE_PATTERN: &str = "./logs/nal.{}.log";
 /// 要保留的存档日志文件数
 const LOG_FILE_COUNT: u32 = 3;
-
 /// 初始化log4rs
 fn init_log4rs(log_file_path: String, level: LevelFilter) {
-    /*
     use log4rs::append::console::ConsoleAppender;
     use log4rs::append::file::FileAppender;
     use log4rs::{Config};
@@ -143,8 +140,7 @@ fn init_log4rs(log_file_path: String, level: LevelFilter) {
             .unwrap()
     };
     log4rs::init_config(config).unwrap();
-    */
-}
+}*/
 
 fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
     let format = time::format_description::parse(

@@ -1,15 +1,10 @@
-use std::string::String;
-use std::str::{from_utf8, from_utf8_mut};
-// use rc4::{consts::*, KeyInit, StreamCipher};
-// use rc4::{Key, Rc4};
-
 #[test]
 fn custom_encode(){
     let key = b"secret_key";
     let mut rc4 = crate::util::rc4::RC4::new(key);
 
     let mut data = b"hello world".to_vec();
-    println!("Original: {:?}", from_utf8(&*data));
+    println!("Original: {:?}", str::from_utf8(&*data));
     println!("Original: {:?}", data.iter().map(|b| format!("{:02x}", b)).collect::<String>());
 
     // let mut data = data.as_slice();

@@ -1,10 +1,8 @@
 use std::collections::HashMap;
-use std::future::Future;
 use std::time::{SystemTime, UNIX_EPOCH};
 use async_trait::async_trait;
-use log::{debug, info};
-use reqwest::{Error, Response};
-use crate::core::nal;
+use log::{debug};
+use reqwest::{Error};
 use crate::core::nal::{get_no_proxy_client, LoginConfig, Nal};
 use crate::util::rc4::RC4;
 

@@ -1,13 +1,7 @@
-use log::log;
-use crate::core::nal;
-use crate::core::nal::{LoginConfig, Nal};
-use crate::core::sangfor::Sangfor;
-
-// #[test]
 #[tokio::test]
 async fn sangfor() {
-    let nal: &dyn Nal = &Sangfor::new("http://1.1.1.4/ac_portal/login.php");
-    let config = LoginConfig {
+    let nal: &dyn crate::core::nal::Nal = &crate::core::sangfor::Sangfor::new("http://1.1.1.4/ac_portal/login.php");
+    let config = crate::core::nal::LoginConfig {
         username: 2336.to_string(),
         password: 13141.to_string(),
     };
@@ -17,6 +11,6 @@ async fn sangfor() {
 
 #[tokio::test]
 async fn check_net() {
-    let is_ok = nal::check_net().await;
+    let is_ok = crate::core::nal::check_net().await;
     println!(" is_ok: {:?}", is_ok);
 }

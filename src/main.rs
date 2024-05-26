@@ -1,21 +1,11 @@
-use std::ffi::OsString;
-use std::{env, fs};
-use std::fs::{File, OpenOptions};
 use std::str::FromStr;
 use tokio::time::{Duration, sleep};
 use log::{debug, error, info, LevelFilter, warn};
-use serde_json::Value::Bool;
 use crate::core::nal;
-use crate::core::nal::{login, LoginConfig, NalConfig, NetStatusCheck, NetType};
+use crate::core::nal::{NalConfig};
 use crate::core::sangfor::Sangfor;
-use std::io::{Error, Write};
-use std::path::PathBuf;
-use std::time::SystemTime;
-use clap::{Command, Parser};
-use serde::{Deserialize, Serialize};
-use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
-use util::service::Service;
-use crate::util::cmd::Cli;
+use clap::{Parser};
+use crate::util::service::Service;
 
 mod core;
 mod util;
@@ -66,7 +56,7 @@ async fn handler(config: NalConfig) {
             //登录
             let sangfor = Sangfor::new("http://1.1.1.4");
             let login_ok = nal::login(&sangfor, &config.login).await;
-            if login_ok.unwrap_or_else(|e| { false }) {
+            if login_ok.unwrap_or_else(|_| { false }) {
                 info!("登录成功");
             } else {
                 error!("登录失败");

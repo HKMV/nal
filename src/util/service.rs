@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
-use log::{debug, info};
+use log::{info};
 use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
 
 /// 系统服务

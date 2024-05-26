@@ -1,15 +1,10 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::time::Duration;
 use async_trait::async_trait;
 use log::{LevelFilter, warn};
 use reqwest::{Client, Error};
 use serde::{Deserialize, Serialize};
-use serde::__private::de::Content::I16;
-use serde_json::Value;
 use serde_yaml::Serializer;
-use tokio::time::timeout;
-use tracing_subscriber::fmt::MakeWriter;
 
 /// 网络自动登录trait
 #[async_trait]
@@ -30,15 +25,6 @@ pub enum NetType {
 pub struct LoginConfig {
     pub username: String,
     pub password: String,
-}
-
-impl LoginConfig {
-    pub fn new(username: &str, password: &str) -> Self {
-        Self {
-            username: String::from(username),
-            password: String::from(password),
-        }
-    }
 }
 
 /// 网络状态检测相关参数
@@ -89,7 +75,7 @@ impl NalConfig {
 /// 初始化配置
 pub fn init_config() -> NalConfig {
     let conf_file_path = "./config.yml";
-    let result = File::open(conf_file_path.clone());
+    let result = File::open(conf_file_path);
     if result.is_err() {
         //初始化配置
         let config = NalConfig::default();
@@ -126,7 +112,7 @@ pub fn get_no_proxy_client() -> Client {
 /// 检测网络是否正常
 pub async fn check_net() -> bool {
     let mut fail_count = 0;
-    for i in 0..3 {
+    for _ in 0..3 {
         if !get_no_proxy_client()
             .get("https://baidu.com")
             .send()
