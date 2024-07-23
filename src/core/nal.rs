@@ -1,10 +1,10 @@
-use std::fs::File;
-use std::time::Duration;
 use async_trait::async_trait;
-use log::{LevelFilter, warn};
+use log::{warn, LevelFilter};
 use reqwest::{Client, Error};
 use serde::{Deserialize, Serialize};
 use serde_yaml::Serializer;
+use std::fs::File;
+use std::time::Duration;
 
 /// 网络自动登录trait
 #[async_trait]
@@ -36,9 +36,9 @@ pub struct NetStatusCheck {
 
 /// 日志相关配置
 #[derive(Debug, Serialize, Deserialize)]
-pub struct LogConfig{
+pub struct LogConfig {
     pub level: String,
-    pub normal: bool
+    pub normal: bool,
 }
 
 /// NAL配置参数
@@ -47,7 +47,7 @@ pub struct NalConfig {
     pub net_type: Option<NetType>,
     pub login: LoginConfig,
     pub check: NetStatusCheck,
-    pub log: LogConfig
+    pub log: LogConfig,
 }
 
 impl NalConfig {
@@ -60,7 +60,7 @@ impl NalConfig {
             },
             check: NetStatusCheck {
                 // 默认3秒
-                interval: 3
+                interval: 3,
             },
             log: LogConfig {
                 //默认日志级别info
@@ -80,7 +80,9 @@ pub fn init_config() -> NalConfig {
         //初始化配置
         let config = NalConfig::default();
         let file_write = File::create(conf_file_path).unwrap();
-        config.serialize(&mut Serializer::new(&file_write)).expect("序列化输出失败!");
+        config
+            .serialize(&mut Serializer::new(&file_write))
+            .expect("序列化输出失败!");
         return config;
     }
 
@@ -99,14 +101,14 @@ pub fn init_config() -> NalConfig {
     }
 }
 
-
 /// 获取没有代理的客户端
 pub fn get_no_proxy_client() -> Client {
     Client::builder()
         .no_proxy() // 禁用代理
         .connect_timeout(Duration::from_secs(10))
         .timeout(Duration::from_secs(30))
-        .build().unwrap()
+        .build()
+        .unwrap()
 }
 
 /// 检测网络是否正常
@@ -117,7 +119,8 @@ pub async fn check_net() -> bool {
             .get("https://baidu.com")
             .send()
             .await
-            .is_ok() {
+            .is_ok()
+        {
             fail_count += 1;
         }
     }

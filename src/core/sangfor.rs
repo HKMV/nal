@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH};
-use async_trait::async_trait;
-use log::{debug};
-use reqwest::{Error};
 use crate::core::nal::{get_no_proxy_client, LoginConfig, Nal};
 use crate::util::rc4::RC4;
+use async_trait::async_trait;
+use log::debug;
+use reqwest::Error;
+use std::collections::HashMap;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// 深信服
 pub struct Sangfor {
@@ -33,7 +33,9 @@ impl Sangfor {
         let mut rc4 = RC4::new(key.as_bytes());
         rc4.apply_keystream(&mut data);
 
-        data.iter().map(|b| format!("{:02x}", b)).collect::<String>()
+        data.iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<String>()
     }
 }
 
@@ -45,14 +47,19 @@ impl Nal for Sangfor {
         let mut params = HashMap::new();
         params.insert("opr", "pwdLogin");
         params.insert("userName", config.username.as_str());
-        let timestamp = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64).to_string();
+        let timestamp = (SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64)
+            .to_string();
         let auth_tag = timestamp.as_str();
         params.insert("auth_tag", auth_tag);
         let pwd = Self::rc4_encode(auth_tag, config.password.as_str());
         params.insert("pwd", pwd.as_str());
         params.insert("rememberPwd", "1");
         let lu = &self.login_url;
-        let rsp = client.post(lu)
+        let rsp = client
+            .post(lu)
             .form(&params)
             .send()
             .await?

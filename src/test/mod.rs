@@ -1,2 +1,2 @@
-mod rc4;
 mod nal;
+mod rc4;

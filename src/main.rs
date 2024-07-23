@@ -1,21 +1,22 @@
-use std::str::FromStr;
-use tokio::time::{Duration, sleep};
-use log::{debug, error, info, LevelFilter, warn};
 use crate::core::nal;
-use crate::core::nal::{NalConfig};
+use crate::core::nal::NalConfig;
 use crate::core::sangfor::Sangfor;
-use clap::{Parser};
 use crate::util::service::Service;
+use clap::Parser;
+use log::{debug, error, info, warn, LevelFilter};
+use std::str::FromStr;
+use tokio::time::{sleep, Duration};
 
 mod core;
-mod util;
 mod test;
+mod util;
 
 #[tokio::main]
 async fn main() {
     let config = nal::init_config();
     debug!("config: {config:#?}");
-    let level_filter = LevelFilter::from_str(config.log.level.as_str()).unwrap_or(LevelFilter::Info);
+    let level_filter =
+        LevelFilter::from_str(config.log.level.as_str()).unwrap_or(LevelFilter::Info);
     util::logs::init("nal.log", level_filter).expect("初始化日志出错");
 
     let cli = util::cmd::Cli::parse();
@@ -56,7 +57,7 @@ async fn handler(config: NalConfig) {
             //登录
             let sangfor = Sangfor::new("http://1.1.1.4");
             let login_ok = nal::login(&sangfor, &config.login).await;
-            if login_ok.unwrap_or_else(|_| { false }) {
+            if login_ok.unwrap_or_else(|_| false) {
                 info!("登录成功");
             } else {
                 error!("登录失败");

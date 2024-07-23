@@ -1,10 +1,10 @@
-use std::{env, fs};
-use std::io::{Error};
+use log::LevelFilter;
+use std::io::Error;
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
-use log::{LevelFilter};
-use tracing::{Level};
+use std::{env, fs};
+use tracing::Level;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
@@ -13,12 +13,17 @@ pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
     let current_dir = if cfg!(target_os = "windows") {
         // env::current_dir()?.to_str().unwrap_or(".").to_string()
         env::current_exe()?
-            .parent().unwrap_or(Path::new("."))
-            .to_str().unwrap_or(".").to_string()
-    } else { ".".to_string() };
+            .parent()
+            .unwrap_or(Path::new("."))
+            .to_str()
+            .unwrap_or(".")
+            .to_string()
+    } else {
+        ".".to_string()
+    };
     let logs_dir = current_dir + "/logs/";
-    fs::create_dir_all(logs_dir.clone()).unwrap();  // 如果需要，创建日志目录
-    // let log_file_path = logs_dir.clone().to_string() + log_file;
+    fs::create_dir_all(logs_dir.clone()).unwrap(); // 如果需要，创建日志目录
+                                                   // let log_file_path = logs_dir.clone().to_string() + log_file;
 
     init_tracing(logs_dir, log_file.to_string(), level);
     Ok(())
@@ -77,7 +82,6 @@ pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
         .chain(fern::log_file(log_file_path)?)
         .apply()?;
 }*/
-
 
 /*/// 这是创建新文件的大小。32MB
 const TRIGGER_FILE_SIZE: u64 = 1024 * 1024 * 32;
@@ -159,16 +163,21 @@ fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
         .with_test_writer()
         .with_max_level(tracing_level)
         .with_timer(tracing_subscriber::fmt::time::OffsetTime::new(
-            time::macros::offset!(+8), format,
+            time::macros::offset!(+8),
+            format,
         ))
         .with_ansi(false)
         .with_writer(
-            Mutex::new(tracing_appender::rolling::daily(logs_dir.clone(), log_file.clone())).and(
+            Mutex::new(tracing_appender::rolling::daily(
+                logs_dir.clone(),
+                log_file.clone(),
+            ))
+            .and(
                 //将 ERROR 及以上级别的日志输出到 stderr, 其他级别日志则输出到 stdout
                 std::io::stdout
                     .with_filter(|meta| meta.level() > &Level::ERROR)
-                    .or_else(std::io::stderr)
-            )
+                    .or_else(std::io::stderr),
+            ),
         )
         .finish()
         .init();
