@@ -1,0 +1,8 @@
+--- Cargo.toml
++++ Cargo.toml
+@@ -25,11 +25,11 @@
+ [dependencies.cfg-if]
+ version = "1.0"
++
++[dependencies.encoding]
++version = "0.2"

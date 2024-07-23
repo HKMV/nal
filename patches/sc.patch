@@ -1,0 +1,18 @@
+--- src/sc.rs
++++ src/sc.rs
+@@ -283,11 +283,11 @@
+     if output.status.success() {
+         Ok(())
+     } else {
+-        let msg = String::from_utf8(output.stderr)
++        use encoding::all::GBK;
++        use encoding::{DecoderTrap, Encoding};
++        let msg = GBK.decode(&*output.stderr, DecoderTrap::Replace)
+             .ok()
+             .filter(|s| !s.trim().is_empty())
+             .or_else(|| {
+-                String::from_utf8(output.stdout)
++                GBK.decode(&*output.stdout, DecoderTrap::Replace)
+                     .ok()
+                     .filter(|s| !s.trim().is_empty())
+             })

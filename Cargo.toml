@@ -23,7 +23,7 @@ async-trait = "0.1.77"
 time = { version = "0.3.36", features = ["parsing", "macros"] }
 #rc4 = "0.1.0"
 
-service-manager = "0.6.1"
+service-manager = "0.7"
 
 reqwest = { version = "0.11", features = ["json"] }
 
@@ -33,3 +33,16 @@ serde_yaml = "0.9.32"
 
 anyhow = "1.0.86"
 thiserror = "1.0.62"
+
+[build-dependencies]
+cargo-patch = "0.3"
+
+[package.metadata.patch.service-manager]
+version = "0.7"
+patches = [
+    "patches/sc.patch",
+    "patches/service-manager-cargo.patch"
+]
+
+[patch.crates-io]
+service-manager = { path = './target/patch/service-manager-0.7.1' }
