@@ -1,8 +1,8 @@
 use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
-use log::{info};
-use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
+use log::{error, info};
+use service_manager::{ScServiceManager, ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
 
 /// 系统服务
 pub struct Service {
@@ -30,15 +30,14 @@ impl Service {
             name: name.parse().unwrap(),
             path: env::current_exe().unwrap(),
             // 通过检测平台上可用的内容来获得通用服务
-            service_manage: <dyn ServiceManager>::native()
-                .expect("Failed to detect management platform"),
+            service_manage: Box::from(ScServiceManager::system()),
         }
     }
 
     /// 安装到系统服务
     pub fn install(&self) {
         // 使用底层服务管理平台安装我们的服务
-        self.service_manage.install(ServiceInstallCtx {
+        let result = self.service_manage.install(ServiceInstallCtx {
             label: self.name.clone(),
             program: self.path.clone(),
             args: vec![OsString::from("--run")],
@@ -46,34 +45,63 @@ impl Service {
             username: None, // 可选字符串，供备用用户运行服务。
             working_directory: Option::from(self.path.parent().unwrap().to_path_buf()), // 服务进程的工作目录的可选字符串。
             environment: None, // 用于提供服务进程的环境变量的可选列表。
-        }).expect("Failed to install");
-        info!("{:}服务安装完成。",self.name.clone().to_string())
+            autostart: true,
+        });
+        match result {
+            Ok(_) => {
+                info!("{}服务安装完成。",self.name.clone().to_string())
+            }
+            Err(err) => {
+                error!("{}服务安装失败：{}",self.name.clone().to_string(),err.to_string())
+            }
+        }
     }
 
     /// 从系统服务卸载
     pub fn uninstall(&self) {
         // 使用底层服务管理平台卸载我们的服务
-        self.service_manage.uninstall(ServiceUninstallCtx {
+        let result = self.service_manage.uninstall(ServiceUninstallCtx {
             label: self.name.clone()
-        }).expect("Failed to uninstall");
-        info!("{:}服务卸载完成。",self.name.clone().to_string())
+        });
+        match result {
+            Ok(_) => {
+                info!("{}服务卸载完成。",self.name.clone().to_string())
+            }
+            Err(err) => {
+                error!("{}服务卸载失败：{}",self.name.clone().to_string(),err.to_string())
+            }
+        }
     }
 
     /// 启动这个服务
     pub fn start(&self) {
         // 使用底层服务管理平台启动我们的服务
-        self.service_manage.start(ServiceStartCtx {
+        let result = self.service_manage.start(ServiceStartCtx {
             label: self.name.clone()
-        }).expect("Failed to start");
-        info!("{:}服务启动完成。",self.name.clone().to_string())
+        });
+        match result {
+            Ok(_) => {
+                info!("{}服务启动完成。",self.name.clone().to_string())
+            }
+            Err(err) => {
+                error!("{}服务启动失败：{}",self.name.clone().to_string(), err.to_string())
+            }
+        }
     }
 
     /// 停止这个服务
     pub fn stop(&self) {
         // 使用底层服务管理平台停止我们的服务
-        self.service_manage.stop(ServiceStopCtx {
+        let result = self.service_manage.stop(ServiceStopCtx {
             label: self.name.clone()
-        }).expect("Failed to stop");
-        info!("{:}服务停止完成。",self.name.clone().to_string())
+        });
+        match result {
+            Ok(_) => {
+                info!("{}服务停止完成。",self.name.clone().to_string());
+            }
+            Err(err) => {
+                info!("{}服务停止失败：{}",self.name.clone().to_string(),err.to_string());
+            }
+        }
     }
 }
