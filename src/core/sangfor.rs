@@ -1,6 +1,5 @@
 use crate::core::nal::{get_no_proxy_client, LoginConfig, Nal};
 use crate::util::rc4::RC4;
-use async_trait::async_trait;
 use log::debug;
 use reqwest::Error;
 use std::collections::HashMap;
@@ -39,9 +38,8 @@ impl Sangfor {
     }
 }
 
-#[async_trait]
 impl Nal for Sangfor {
-    async fn login_net(&self, config: &LoginConfig) -> Result<bool, Error> {
+    fn login_net(&self, config: &LoginConfig) -> Result<bool, Error> {
         let client = get_no_proxy_client();
 
         let mut params = HashMap::new();
@@ -61,10 +59,8 @@ impl Nal for Sangfor {
         let rsp = client
             .post(lu)
             .form(&params)
-            .send()
-            .await?
-            .json::<serde_json::Value>()
-            .await?;
+            .send()?
+            .json::<serde_json::Value>()?;
         debug!("login result: {rsp:#?}");
         // rsp.is_ok()
         Ok(rsp["success"] == true)

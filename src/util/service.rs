@@ -1,7 +1,7 @@
 use std::env;
 use std::path::PathBuf;
 use log::{error, info};
-use service_manager::{ScConfig, ScInstallConfig, ScServiceManager, ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx, WindowsErrorSeverity};
+use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
 
 /// 系统服务
 pub struct Service {

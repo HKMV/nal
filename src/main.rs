@@ -5,14 +5,14 @@ use crate::util::service::Service;
 use clap::Parser;
 use log::{debug, error, info, warn, LevelFilter};
 use std::str::FromStr;
-use tokio::time::{sleep, Duration};
+use std::thread::sleep;
+use std::time::Duration;
 
 mod core;
 mod test;
 mod util;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let config = nal::init_config();
     debug!("config: {config:#?}");
     let level_filter =
@@ -54,26 +54,26 @@ async fn main() {
         return;
     }
     if cli.run {
-        handler(config).await;
+        handler(config);
         return;
     }
     //默认直接运行
-    handler(config).await
+    handler(config)
 }
 
-async fn handler(config: NalConfig) {
+fn handler(config: NalConfig) {
     println!("开始检测。。。");
     if !cfg!(debug_assertions) {
         info!("开始检测。。。");
     }
     loop {
         //检测网络是否正常
-        let is_ok = nal::check_net().await;
+        let is_ok = nal::check_net();
         if !is_ok {
             warn!("网络异常");
             //登录
             let sangfor = Sangfor::new("http://1.1.1.4");
-            let login_ok = nal::login(&sangfor, &config.login).await;
+            let login_ok = nal::login(&sangfor, &config.login);
             if login_ok.unwrap_or_else(|_| false) {
                 info!("登录成功");
             } else {
@@ -84,6 +84,6 @@ async fn handler(config: NalConfig) {
         };
 
         // 延迟指定秒后再次执行
-        sleep(Duration::from_secs(config.check.interval as u64)).await;
+        sleep(Duration::from_secs(config.check.interval as u64));
     }
 }

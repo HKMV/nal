@@ -1,16 +1,15 @@
-use async_trait::async_trait;
 use log::{warn, LevelFilter};
-use reqwest::{Client, Error};
+use reqwest::{Error};
 use serde::{Deserialize, Serialize};
 use serde_yaml::Serializer;
 use std::fs::File;
 use std::time::Duration;
+use reqwest::blocking::Client;
 
 /// 网络自动登录trait
-#[async_trait]
 pub trait Nal {
     /// 登录网络
-    async fn login_net(&self, config: &LoginConfig) -> Result<bool, Error>;
+    fn login_net(&self, config: &LoginConfig) -> Result<bool, Error>;
 }
 
 /// 网络类型
@@ -104,21 +103,20 @@ pub fn init_config() -> NalConfig {
 /// 获取没有代理的客户端
 pub fn get_no_proxy_client() -> Client {
     Client::builder()
-        .no_proxy() // 禁用代理
+        .no_proxy()
         .connect_timeout(Duration::from_secs(10))
-        .timeout(Duration::from_secs(30))
+        .timeout(Duration::from_secs(10))
         .build()
         .unwrap()
 }
 
 /// 检测网络是否正常
-pub async fn check_net() -> bool {
+pub fn check_net() -> bool {
     let mut fail_count = 0;
     for _ in 0..3 {
         if !get_no_proxy_client()
             .get("https://baidu.com")
             .send()
-            .await
             .is_ok()
         {
             fail_count += 1;
@@ -128,6 +126,6 @@ pub async fn check_net() -> bool {
     fail_count < 3
 }
 
-pub async fn login<T: Nal>(nal: &T, lc: &LoginConfig) -> Result<bool, Error> {
-    nal.login_net(lc).await
+pub fn login<T: Nal>(nal: &T, lc: &LoginConfig) -> Result<bool, Error> {
+    nal.login_net(lc)
 }
