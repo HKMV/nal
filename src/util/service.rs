@@ -1,8 +1,7 @@
 use std::env;
-use std::ffi::OsString;
 use std::path::PathBuf;
 use log::{error, info};
-use service_manager::{ScServiceManager, ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
+use service_manager::{ScConfig, ScInstallConfig, ScServiceManager, ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx, WindowsErrorSeverity};
 
 /// 系统服务
 pub struct Service {
@@ -25,13 +24,13 @@ impl Service {
     /// ```
     /// let service = Service::new("nal");
     /// ```
-    pub fn new(name: &str) -> Self {
-        Self {
-            name: name.parse().unwrap(),
-            path: env::current_exe().unwrap(),
+    pub fn new(name: &str) -> anyhow::Result<Self> {
+        Ok(Self {
+            name: name.parse()?,
+            path: env::current_exe()?,
             // 通过检测平台上可用的内容来获得通用服务
-            service_manage: Box::from(ScServiceManager::system()),
-        }
+            service_manage: <dyn ServiceManager>::native()?,
+        })
     }
 
     /// 安装到系统服务
@@ -40,7 +39,7 @@ impl Service {
         let result = self.service_manage.install(ServiceInstallCtx {
             label: self.name.clone(),
             program: self.path.clone(),
-            args: vec![OsString::from("--run")],
+            args: vec![],
             contents: None, // 特定于系统的服务内容的可选字符串。
             username: None, // 可选字符串，供备用用户运行服务。
             working_directory: Option::from(self.path.parent().unwrap().to_path_buf()), // 服务进程的工作目录的可选字符串。
@@ -49,10 +48,16 @@ impl Service {
         });
         match result {
             Ok(_) => {
-                info!("{}服务安装完成。",self.name.clone().to_string())
+                if !cfg!(debug_assertions) {
+                    info!("{}服务安装完成。",self.name.clone().to_string());
+                }
+                println!("{}服务安装完成。", self.name.clone().to_string())
             }
             Err(err) => {
-                error!("{}服务安装失败：{}",self.name.clone().to_string(),err.to_string())
+                if !cfg!(debug_assertions) {
+                    error!("{}服务安装失败：{}",self.name.clone().to_string(),err.to_string())
+                }
+                println!("{}服务安装失败：{}", self.name.clone().to_string(), err.to_string())
             }
         }
     }
@@ -65,10 +70,16 @@ impl Service {
         });
         match result {
             Ok(_) => {
-                info!("{}服务卸载完成。",self.name.clone().to_string())
+                if !cfg!(debug_assertions) {
+                    info!("{}服务卸载完成。",self.name.clone().to_string());
+                }
+                println!("{}服务卸载完成。", self.name.clone().to_string())
             }
             Err(err) => {
-                error!("{}服务卸载失败：{}",self.name.clone().to_string(),err.to_string())
+                if !cfg!(debug_assertions) {
+                    error!("{}服务卸载失败：{}",self.name.clone().to_string(),err.to_string());
+                }
+                println!("{}服务卸载失败：{}", self.name.clone().to_string(), err.to_string())
             }
         }
     }
@@ -81,10 +92,16 @@ impl Service {
         });
         match result {
             Ok(_) => {
-                info!("{}服务启动完成。",self.name.clone().to_string())
+                if !cfg!(debug_assertions) {
+                    info!("{}服务启动完成。",self.name.clone().to_string());
+                }
+                println!("{}服务启动完成。", self.name.clone().to_string())
             }
             Err(err) => {
-                error!("{}服务启动失败：{}",self.name.clone().to_string(), err.to_string())
+                if !cfg!(debug_assertions) {
+                    error!("{}服务启动失败：{}",self.name.clone().to_string(), err.to_string());
+                }
+                println!("{}服务启动失败：{}", self.name.clone().to_string(), err.to_string())
             }
         }
     }
@@ -97,10 +114,16 @@ impl Service {
         });
         match result {
             Ok(_) => {
-                info!("{}服务停止完成。",self.name.clone().to_string());
+                if !cfg!(debug_assertions) {
+                    info!("{}服务停止完成。",self.name.clone().to_string());
+                }
+                println!("{}服务停止完成。", self.name.clone().to_string());
             }
             Err(err) => {
-                info!("{}服务停止失败：{}",self.name.clone().to_string(),err.to_string());
+                if !cfg!(debug_assertions) {
+                    info!("{}服务停止失败：{}",self.name.clone().to_string(),err.to_string());
+                }
+                println!("{}服务停止失败：{}", self.name.clone().to_string(), err.to_string());
             }
         }
     }

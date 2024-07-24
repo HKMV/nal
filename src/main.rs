@@ -20,7 +20,21 @@ async fn main() {
     util::logs::init("nal.log", level_filter).expect("初始化日志出错");
 
     let cli = util::cmd::Cli::parse();
-    let service = Service::new("net-auto-login");
+    let service_res = Service::new("net-auto-login");
+    let service = match service_res {
+        Ok(ser) => { ser }
+        Err(err) => {
+            println!("创建服务出错！");
+            if !cfg!(debug_assertions) {
+                error!("创建服务出错：{}",err.to_string());
+            }
+            return;
+        }
+    };
+
+    // service.install();
+    // return;
+
     if cli.install {
         service.install();
         service.start();
@@ -43,12 +57,15 @@ async fn main() {
         handler(config).await;
         return;
     }
-    if cfg!(debug_assertions) {
-        handler(config).await
-    }
+    //默认直接运行
+    handler(config).await
 }
 
 async fn handler(config: NalConfig) {
+    println!("开始检测。。。");
+    if !cfg!(debug_assertions) {
+        info!("开始检测。。。");
+    }
     loop {
         //检测网络是否正常
         let is_ok = nal::check_net().await;

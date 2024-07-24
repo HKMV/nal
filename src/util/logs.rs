@@ -23,7 +23,7 @@ pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
     };
     let logs_dir = current_dir + "/logs/";
     fs::create_dir_all(logs_dir.clone()).unwrap(); // 如果需要，创建日志目录
-                                                   // let log_file_path = logs_dir.clone().to_string() + log_file;
+    // let log_file_path = logs_dir.clone().to_string() + log_file;
 
     init_tracing(logs_dir, log_file.to_string(), level);
     Ok(())
@@ -153,7 +153,8 @@ fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
     // time::format_description::well_known::Rfc3339;
 
     let tracing_level = Level::from_str(level.as_str()).unwrap();
-    tracing_subscriber::fmt()
+
+    let builder = tracing_subscriber::fmt()
         .with_file(true)
         .with_level(true)
         .with_target(true)
@@ -166,19 +167,25 @@ fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
             time::macros::offset!(+8),
             format,
         ))
-        .with_ansi(false)
-        .with_writer(
-            Mutex::new(tracing_appender::rolling::daily(
-                logs_dir.clone(),
-                log_file.clone(),
-            ))
-            .and(
+        .with_ansi(false);
+    if cfg!(debug_assertions) {
+        builder
+            //调试模式输出到控制台
+            .with_writer(
                 //将 ERROR 及以上级别的日志输出到 stderr, 其他级别日志则输出到 stdout
                 std::io::stdout
                     .with_filter(|meta| meta.level() > &Level::ERROR)
-                    .or_else(std::io::stderr),
-            ),
-        )
-        .finish()
-        .init();
+                    .or_else(std::io::stderr), )
+            .finish()
+            .init();
+    } else {
+        builder
+            //非调试模式输出到日志文件
+            .with_writer(Mutex::new(tracing_appender::rolling::daily(
+                logs_dir.clone(),
+                log_file.clone(),
+            )))
+            .finish()
+            .init();
+    }
 }
