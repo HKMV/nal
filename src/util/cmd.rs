@@ -1,6 +1,6 @@
 use clap_derive::Parser;
 
-#[derive(Parser)]
+#[derive(Parser, Clone)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
     #[arg(short = 'i', long)]

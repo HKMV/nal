@@ -34,6 +34,9 @@ serde_yaml = "0.9.32"
 anyhow = "1.0.86"
 thiserror = "1.0.62"
 
+[target.'cfg(windows)'.dependencies.windows-service]
+version = "0.7"
+
 [build-dependencies]
 cargo-patch = "0.3"
 

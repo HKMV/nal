@@ -9,7 +9,7 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 /// 初始化日志
-pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
+pub fn init(log_file: String, level: LevelFilter) -> Result<(), Error> {
     let current_dir = if cfg!(target_os = "windows") {
         // env::current_dir()?.to_str().unwrap_or(".").to_string()
         env::current_exe()?
@@ -25,7 +25,7 @@ pub fn init(log_file: &str, level: LevelFilter) -> Result<(), Error> {
     fs::create_dir_all(logs_dir.clone()).unwrap(); // 如果需要，创建日志目录
     // let log_file_path = logs_dir.clone().to_string() + log_file;
 
-    init_tracing(logs_dir, log_file.to_string(), level);
+    init_tracing(logs_dir, log_file, level);
     Ok(())
 }
 
