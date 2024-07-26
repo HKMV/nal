@@ -2,7 +2,7 @@ use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
 use log::{error, info};
-use service_manager::{ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
+use service_manager::{ScServiceManager, ServiceInstallCtx, ServiceLabel, ServiceManager, ServiceStartCtx, ServiceStopCtx, ServiceUninstallCtx};
 
 /// 系统服务
 pub struct Service {
@@ -26,11 +26,17 @@ impl Service {
     /// let service = Service::new("nal");
     /// ```
     pub fn new(name: &str) -> anyhow::Result<Self> {
+        let service_manager = if cfg!(windows) {
+            Box::new(ScServiceManager::system())
+        } else {
+            <dyn ServiceManager>::native()?
+        };
+
         Ok(Self {
             name: name.parse()?,
             path: env::current_exe()?,
             // 通过检测平台上可用的内容来获得通用服务
-            service_manage: <dyn ServiceManager>::native()?,
+            service_manage: service_manager,
         })
     }
 
