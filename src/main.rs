@@ -6,13 +6,9 @@ use crate::util::service::Service;
 use clap::Parser;
 use log::{debug, error, info, warn, LevelFilter};
 use std::str::FromStr;
-use std::sync::mpsc;
 use std::thread;
 use std::thread::sleep;
 use std::time::Duration;
-use windows_service::service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, ServiceType};
-use windows_service::service_control_handler;
-use windows_service::service_control_handler::ServiceControlHandlerResult;
 use util::{cmd, logs};
 use crate::util::cmd::Cli;
 
