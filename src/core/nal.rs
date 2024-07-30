@@ -5,6 +5,7 @@ use serde_yaml::Serializer;
 use std::fs::File;
 use std::time::Duration;
 use reqwest::blocking::Client;
+use crate::util::app_dir;
 
 /// 网络自动登录trait
 pub trait Nal {
@@ -73,8 +74,8 @@ impl NalConfig {
 
 /// 初始化配置
 pub fn init_config() -> NalConfig {
-    let conf_file_path = "./config.yml";
-    let result = File::open(conf_file_path);
+    let conf_file_path = app_dir() + "/config.yml";
+    let result = File::open(conf_file_path.clone());
     if result.is_err() {
         //初始化配置
         let config = NalConfig::default();

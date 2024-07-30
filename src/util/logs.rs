@@ -1,26 +1,16 @@
 use log::LevelFilter;
 use std::io::Error;
-use std::path::Path;
 use std::str::FromStr;
 use std::sync::Mutex;
-use std::{env, fs};
+use std::{fs};
 use tracing::Level;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use crate::util::app_dir;
 
 /// 初始化日志
 pub fn init(log_file: String, level: LevelFilter) -> Result<(), Error> {
-    let current_dir = if cfg!(target_os = "windows") {
-        // env::current_dir()?.to_str().unwrap_or(".").to_string()
-        env::current_exe()?
-            .parent()
-            .unwrap_or(Path::new("."))
-            .to_str()
-            .unwrap_or(".")
-            .to_string()
-    } else {
-        ".".to_string()
-    };
+    let current_dir = app_dir();
     let logs_dir = current_dir + "/logs/";
     fs::create_dir_all(logs_dir.clone()).unwrap(); // 如果需要，创建日志目录
     // let log_file_path = logs_dir.clone().to_string() + log_file;
