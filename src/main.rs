@@ -23,7 +23,7 @@ fn main() {
     debug!("config: {config:#?}");
     let level_filter =
         LevelFilter::from_str(config.log.level.as_str()).unwrap_or(LevelFilter::Info);
-    logs::init(pkg_name.to_owned() + ".log", level_filter).expect("初始化日志出错");
+    logs::init(pkg_name.to_owned(), level_filter).expect("初始化日志出错");
 
     let cli = cmd::Cli::parse();
 

@@ -1,8 +1,7 @@
 use log::LevelFilter;
 use std::io::Error;
 use std::str::FromStr;
-use std::sync::Mutex;
-use std::{fs};
+use std::fs;
 use tracing::Level;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -171,10 +170,13 @@ fn init_tracing(logs_dir: String, log_file: String, level: LevelFilter) {
     } else {
         builder
             //非调试模式输出到日志文件
-            .with_writer(Mutex::new(tracing_appender::rolling::daily(
-                logs_dir.clone(),
-                log_file.clone(),
-            )))
+            .with_writer(tracing_appender::rolling::Builder::new()
+                .filename_prefix(log_file.clone())
+                .filename_suffix("log")
+                .max_log_files(7)
+                .rotation(tracing_appender::rolling::Rotation::DAILY)
+                .build(logs_dir.clone())
+                .unwrap())
             .finish()
             .init();
     }
