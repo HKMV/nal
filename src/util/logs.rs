@@ -14,8 +14,76 @@ pub fn init(log_file: String, level: LevelFilter) -> Result<(), Error> {
     fs::create_dir_all(logs_dir.clone()).unwrap(); // 如果需要，创建日志目录
     // let log_file_path = logs_dir.clone().to_string() + log_file;
 
+    hook_panic_handler(logs_dir.clone(), log_file.clone());
     init_tracing(logs_dir, log_file, level);
     Ok(())
+}
+
+
+/// 拦截panic处理，保存panic信息到panic日志中
+///
+/// # Arguments
+///
+/// * `logs_dir`: 日志保存位置
+/// * `app_name`: 应用名称
+///
+/// returns: ()
+///
+/// # Examples
+///
+/// ```
+/// logs::setup_panic_handler(String::from("./logs/"), String::from("nal"));
+/// ```
+pub fn hook_panic_handler(logs_dir: String, app_name: String) {
+    use std::backtrace;
+    use std::io::Write;
+    use std::fs::OpenOptions;
+    use time::{OffsetDateTime};
+    use time::macros::{offset};
+
+    let format = time::format_description::parse(
+        "[year]-[month padding:zero]-[day padding:zero] [hour]:[minute]:[second].[subsecond digits:3]",
+    ).unwrap();
+    std::panic::set_hook(Box::new(move |info| {
+        let backtrace = backtrace::Backtrace::force_capture();
+        let payload = info.payload();
+        let payload_str: Option<&str> = if let Some(s) = payload.downcast_ref::<&str>() {
+            Some(s)
+        } else if let Some(s) = payload.downcast_ref::<String>() {
+            Some(s)
+        } else {
+            None
+        };
+
+        if let Some(payload_str) = payload_str {
+            println!(
+                "panic occurred: payload:{}, location: {:?}",
+                payload_str,
+                info.location()
+            );
+        } else {
+            println!("panic occurred: location: {:?}", info.location());
+        }
+        let current_time =
+            match OffsetDateTime::now_utc()
+                .to_offset(offset!(+8))
+                .format(&format) {
+                Ok(t) => { t }
+                Err(e) => {
+                    println!("get current time error: {:?}", e);
+                    "".to_string()
+                }
+            };
+
+        let _ = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .create(true) // 如果文件不存在，则创建文件
+            .open(format!("{}{}.panic.log", logs_dir, app_name))
+            .and_then(|mut f| f.write_all(format!("{} {:?}\n{:#?}\n", current_time, info, backtrace).as_bytes()));
+        println!("{}", "panic backtrace saved");
+        std::process::exit(1);
+    }));
 }
 
 /* fn init_env_logger() {
