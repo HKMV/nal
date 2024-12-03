@@ -34,18 +34,18 @@ serde_yaml = "0.9.32"
 anyhow = "1.0.86"
 thiserror = "1.0.62"
 
-[target.'cfg(windows)'.dependencies.windows-service]
-version = "0.7"
+# 编译到linux-musl所需，并且安装交叉便于到musl所需工具：sudo apt install musl-tools
+openssl = { version = "0.10", features = ["vendored"] }
 
-[build-dependencies]
+[target.'cfg(windows)'.build-dependencies]
 cargo-patch = "0.3"
 
-[package.metadata.patch.service-manager]
+[package.metadata.'cfg(windows)'.patch.service-manager]
 version = "0.7"
 patches = [
     "patches/sc.patch",
     "patches/service-manager-cargo.patch"
 ]
 
-[patch.crates-io]
+['cfg(windows)'.patch.crates-io]
 service-manager = { path = './target/patch/service-manager-0.7.1' }

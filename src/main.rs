@@ -1,4 +1,3 @@
-use std::process::exit;
 use crate::core::nal;
 use crate::core::nal::NalConfig;
 use crate::core::sangfor::Sangfor;
@@ -6,7 +5,6 @@ use crate::util::service::Service;
 use clap::Parser;
 use log::{debug, error, info, warn, LevelFilter};
 use std::str::FromStr;
-use std::thread;
 use std::thread::sleep;
 use std::time::Duration;
 use util::{cmd, logs};
@@ -29,7 +27,7 @@ fn main() {
 
     if !is_service_cmd(cli.clone()) {
         if cli.run {
-            run_service()
+            service_main();
         } else {
             //默认直接运行
             handler(config)
@@ -72,17 +70,10 @@ fn main() {
     }
 }
 
-fn run_service() {
-    if cfg!(windows) {
-        windows_service_main();
-    } else {
-        let config = nal::init_config();
-        handler(config)
-    }
-}
-
 #[cfg(windows)]
-fn windows_service_main() {
+fn service_main() {
+    use std::process::exit;
+    use std::thread;
     use std::ffi::OsString;
     use windows_service::service_dispatcher;
     use windows_service::service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, ServiceType};
@@ -152,6 +143,12 @@ fn windows_service_main() {
     if let Err(_e) = result {
         error!("服务运行出错：{}", _e.to_string())
     }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn service_main(){
+    let config = nal::init_config();
+    handler(config)
 }
 
 fn handler(config: NalConfig) {
